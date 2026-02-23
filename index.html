@@ -1,195 +1,87 @@
-<!-- ============================================================
-  豊洲イーウェルクリニック ワクチン在庫 自動表示ウィジェット
-  WordPressの記事編集画面で「カスタムHTML」ブロックに貼り付ける
-  ============================================================ -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ワクチン在庫</title>
+<style>
+body{margin:16px;font-family:sans-serif}
+#vsw .upd{font-size:12px;color:#888;text-align:right;margin-bottom:12px}
+#vsw .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#27ae60;margin-right:4px;vertical-align:middle}
+#vsw h3{font-size:15px;font-weight:bold;margin:20px 0 6px;padding:6px 12px;border-left:4px solid #0066cc;background:#f0f4f8;color:#1a2332}
+#vsw table{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:8px}
+#vsw th{background:#f0f4f8;padding:9px 14px;text-align:left;font-weight:bold;border:1px solid #dde4ec;color:#333}
+#vsw td{padding:9px 14px;border:1px solid #dde4ec;vertical-align:middle}
+#vsw tr:nth-child(even) td{background:#f8fafc}
+#vsw .q{text-align:center;font-weight:bold;font-size:15px;min-width:70px;white-space:nowrap}
+#vsw .q.out{color:#c0392b}
+#vsw .q.low{color:#e67e22}
+#vsw .q.ok{color:#27ae60}
+#vsw .b{display:inline-block;font-size:11px;padding:2px 7px;border-radius:20px;font-weight:bold;margin-left:6px;vertical-align:middle}
+#vsw .b.out{background:#fdecea;color:#c0392b}
+#vsw .b.low{background:#fef9e7;color:#e67e22}
+</style>
+</head>
+<body>
+<div id="vsw"><p style="color:#888">⏳ 在庫情報を読み込み中...</p></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-<style>
-  #vaccine-stock-widget {
-    font-family: sans-serif;
-    margin: 20px 0;
-  }
-  #vaccine-stock-widget h3.vs-section-title {
-    font-size: 16px;
-    font-weight: bold;
-    margin: 24px 0 8px;
-    padding: 6px 12px;
-    border-left: 4px solid #0066cc;
-    background: #f0f4f8;
-    color: #1a2332;
-  }
-  #vaccine-stock-widget h3.vs-section-title:first-child {
-    margin-top: 0;
-  }
-  #vaccine-stock-widget .vs-updated {
-    font-size: 12px;
-    color: #888;
-    margin-bottom: 16px;
-    text-align: right;
-  }
-  #vaccine-stock-widget .vs-sync-dot {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #27ae60;
-    margin-right: 4px;
-    vertical-align: middle;
-  }
-  #vaccine-stock-widget table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-    margin-bottom: 8px;
-  }
-  #vaccine-stock-widget th {
-    background: #f0f4f8;
-    padding: 9px 14px;
-    text-align: left;
-    font-weight: bold;
-    border: 1px solid #dde4ec;
-    color: #333;
-  }
-  #vaccine-stock-widget td {
-    padding: 9px 14px;
-    border: 1px solid #dde4ec;
-    vertical-align: middle;
-  }
-  #vaccine-stock-widget tr:nth-child(even) td {
-    background: #f8fafc;
-  }
-  #vaccine-stock-widget .vs-qty-cell {
-    text-align: center;
-    font-weight: bold;
-    font-size: 15px;
-    min-width: 80px;
-    white-space: nowrap;
-  }
-  #vaccine-stock-widget .vs-qty-cell.out  { color: #c0392b; }
-  #vaccine-stock-widget .vs-qty-cell.low  { color: #e67e22; }
-  #vaccine-stock-widget .vs-qty-cell.ok   { color: #27ae60; }
-  #vaccine-stock-widget .vs-badge {
-    display: inline-block;
-    font-size: 11px;
-    padding: 2px 7px;
-    border-radius: 20px;
-    font-weight: bold;
-    margin-left: 6px;
-    vertical-align: middle;
-  }
-  #vaccine-stock-widget .vs-badge.out { background: #fdecea; color: #c0392b; }
-  #vaccine-stock-widget .vs-badge.low { background: #fef9e7; color: #e67e22; }
-  #vaccine-stock-widget .vs-loading {
-    text-align: center; padding: 30px; color: #888; font-size: 14px;
-  }
-</style>
-
-<div id="vaccine-stock-widget">
-  <div class="vs-loading">⏳ 在庫情報を読み込み中...</div>
-</div>
-
 <script>
-(function() {
-  const firebaseConfig = {
-    apiKey: "AIzaSyAbUBYMYfKoQmBuPZVfCjjtBfZ0SoWTgMU",
-    authDomain: "clinic-inventory-c2207.firebaseapp.com",
-    projectId: "clinic-inventory-c2207",
-    storageBucket: "clinic-inventory-c2207.firebasestorage.app",
-    messagingSenderId: "609898487561",
-    appId: "1:609898487561:web:6388126fef0c9672803dd8"
-  };
+!function(){
+  var cfg={apiKey:'AIzaSyAbUBYMYfKoQmBuPZVfCjjtBfZ0SoWTgMU',authDomain:'clinic-inventory-c2207.firebaseapp.com',projectId:'clinic-inventory-c2207',storageBucket:'clinic-inventory-c2207.firebasestorage.app',messagingSenderId:'609898487561',appId:'1:609898487561:web:6388126fef0c9672803dd8'};
+  var app;
+  try{app=firebase.app('vsw');}catch(e){app=firebase.initializeApp(cfg,'vsw');}
+  var db=firebase.firestore(app);
 
-  let app;
-  try { app = firebase.app('vaccine-widget'); }
-  catch(e) { app = firebase.initializeApp(firebaseConfig, 'vaccine-widget'); }
-  const db = firebase.firestore(app);
-
-  // ===== 国産ワクチン（Firestoreの商品名と完全一致させること） =====
-  const DOMESTIC = [
-    { name: 'おたふくワクチン',                     price: '6,600円(税込)' },
-    { name: '国産A型肝炎ワクチン(エイムゲン)',       price: '8,800円(税込)' },
-    { name: '破傷風トキソイド',                     price: '3,800円(税込)' },
-    { name: '3種混合(DPT)ワクチン(トリビック)',      price: '5,500円(税込)' },
-    { name: '帯状疱疹ワクチン(シングリックス)',       price: '22,000円(税込)' },
-    { name: '肺炎球菌ワクチン(ニューモバックス)',     price: '8,500円(税込)' },
-    { name: '水痘・帯状疱疹ワクチン（生ワクチン）',  price: '8,400円(税込)' },
-    { name: 'MRワクチン(ミールビック)',              price: '8,800円(税込)' },
-    { name: '国産B型肝炎ワクチン(ビームゲン)',       price: '3,500円(税込)' },
+  var DOM=[
+    {n:'おたふくワクチン',p:'6,600円(税込)'},
+    {n:'国産A型肝炎ワクチン(エイムゲン)',p:'8,800円(税込)'},
+    {n:'破傷風トキソイド',p:'3,800円(税込)'},
+    {n:'3種混合(DPT)ワクチン(トリビック)',p:'5,500円(税込)'},
+    {n:'帯状疱疹ワクチン(シングリックス)',p:'22,000円(税込)'},
+    {n:'肺炎球菌ワクチン(ニューモバックス)',p:'8,500円(税込)'},
+    {n:'水痘・帯状疱疹ワクチン（生ワクチン）',p:'8,400円(税込)'},
+    {n:'MRワクチン(ミールビック)',p:'8,800円(税込)'},
+    {n:'国産B型肝炎ワクチン(ビームゲン)',p:'3,500円(税込)'}
+  ];
+  var IMP=[
+    {n:'輸入腸チフスワクチン(Typbar TCV)',p:'11,000円(税込)'},
+    {n:'輸入狂犬病ワクチン(ChiroRab)',p:'14,800円(税込)'},
+    {n:'輸入A型肝炎ワクチン(Havrix)',p:'8,800円(税込)'},
+    {n:'輸入コレラワクチン(DUKORAL)',p:'12,000円(税込)'},
+    {n:'輸入3種混合ワクチン（Boostrix）',p:'5,500円(税込)'},
+    {n:'輸入日本脳炎ワクチン(JENVAC)',p:'6,600円(税込)'},
+    {n:'輸入A型B型肝炎ワクチン(Twinrix)',p:'17,600円(税込)'}
   ];
 
-  // ===== 輸入ワクチン（Firestoreの商品名と完全一致させること） =====
-  const IMPORTED = [
-    { name: '輸入腸チフスワクチン(Typbar TCV)',      price: '11,000円(税込)' },
-    { name: '輸入狂犬病ワクチン(ChiroRab)',          price: '14,800円(税込)' },
-    { name: '輸入A型肝炎ワクチン(Havrix)',           price: '8,800円(税込)' },
-    { name: '輸入コレラワクチン(DUKORAL)',           price: '(12,000円税込)' },
-    { name: '輸入3種混合ワクチン（Boostrix）',       price: '5,500円(税込)' },
-    { name: '輸入日本脳炎ワクチン(JENVAC)',          price: '6,600円(税込)' },
-    { name: '輸入A型B型肝炎ワクチン(Twinrix)',       price: '17.600円(税込)' },
-  ];
-
-  function buildTable(config, stockMap) {
-    let rows = '';
-    config.forEach(function(cfg) {
-      const p = stockMap[cfg.name];
-      let qtyHtml, badgeHtml = '', cls = '';
-
-      if (!p) {
-        qtyHtml = '<span style="color:#bbb">－</span>';
-      } else if (p.stock === 0) {
-        cls = 'out';
-        qtyHtml = '終了';
-        badgeHtml = '<span class="vs-badge out">在庫切れ</span>';
-      } else if (p.stock < p.minStock) {
-        cls = 'low';
-        qtyHtml = p.stock + '&nbsp;' + (p.unit || '個');
-        badgeHtml = '<span class="vs-badge low">残りわずか</span>';
-      } else {
-        cls = 'ok';
-        qtyHtml = p.stock + '&nbsp;' + (p.unit || '個');
-      }
-
-      rows += '<tr>'
-        + '<td>' + cfg.name + badgeHtml + '</td>'
-        + '<td class="vs-qty-cell ' + cls + '">' + qtyHtml + '</td>'
-        + '<td>' + cfg.price + '</td>'
-        + '</tr>';
-    });
-
-    return '<table>'
-      + '<thead><tr><th>種類</th><th style="text-align:center">在庫</th><th>価格</th></tr></thead>'
-      + '<tbody>' + rows + '</tbody>'
-      + '</table>';
+  function row(c,map){
+    var pd=map[c.n],q='<span style="color:#bbb">－</span>',b='',cls='';
+    if(pd){
+      if(pd.stock===0){cls='out';q='終了';b='<span class="b out">在庫切れ</span>';}
+      else if(pd.stock<pd.minStock){cls='low';q=pd.stock+' '+(pd.unit||'個');b='<span class="b low">残りわずか</span>';}
+      else{cls='ok';q=pd.stock+' '+(pd.unit||'個');}
+    }
+    return '<tr><td>'+c.n+b+'</td><td class="q '+cls+'">'+q+'</td><td>'+c.p+'</td></tr>';
+  }
+  function tbl(list,map){
+    var r='';
+    for(var i=0;i<list.length;i++)r+=row(list[i],map);
+    return '<table><thead><tr><th>種類</th><th style="text-align:center">在庫</th><th>価格</th></tr></thead><tbody>'+r+'</tbody></table>';
   }
 
-  const widget = document.getElementById('vaccine-stock-widget');
-
-  db.collection('products')
-    .where('category', '==', 'ワクチン')
-    .onSnapshot(function(snap) {
-      const stockMap = {};
-      snap.forEach(function(doc) {
-        const d = doc.data();
-        stockMap[d.name] = d;
-      });
-
-      const now = new Date();
-      const dateStr = now.toLocaleDateString('ja-JP', {
-        year: 'numeric', month: 'long', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      }) + ' 更新';
-
-      widget.innerHTML =
-        '<div class="vs-updated"><span class="vs-sync-dot"></span>' + dateStr + '</div>'
-        + '<h3 class="vs-section-title">🇯🇵 国産ワクチン</h3>'
-        + buildTable(DOMESTIC, stockMap)
-        + '<h3 class="vs-section-title">✈️ 輸入ワクチン</h3>'
-        + buildTable(IMPORTED, stockMap);
-
-    }, function(err) {
-      widget.innerHTML = '<div class="vs-loading">⚠️ データの取得に失敗しました: ' + err.message + '</div>';
-    });
-})();
+  var w=document.getElementById('vsw');
+  db.collection('products').where('category','==','ワクチン').onSnapshot(function(snap){
+    var map={};
+    snap.forEach(function(doc){var d=doc.data();map[d.name]=d;});
+    var dt=new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})+' 更新';
+    w.innerHTML='<div class="upd"><span class="dot"></span>'+dt+'</div>'
+      +'<h3>🇯🇵 国産ワクチン</h3>'+tbl(DOM,map)
+      +'<h3>✈️ 輸入ワクチン</h3>'+tbl(IMP,map);
+  },function(err){
+    w.innerHTML='<p style="color:red">⚠️ 読み込みエラー: '+err.message+'</p>';
+  });
+}();
 </script>
+</body>
+</html>
