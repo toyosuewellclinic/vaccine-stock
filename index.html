@@ -71,14 +71,14 @@ body{margin:16px;font-family:sans-serif}
   }
 
   var w=document.getElementById('vsw');
-  db.collection('products').where('category','==','ワクチン').onSnapshot(function(snap){
+  db.collection('products').where('category','==','ワクチン').get().then(function(snap){
     var map={};
     snap.forEach(function(doc){var d=doc.data();map[d.name]=d;});
     var dt=new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})+' 更新';
     w.innerHTML='<div class="upd"><span class="dot"></span>'+dt+'</div>'
       +'<h3>🇯🇵 国産ワクチン</h3>'+tbl(DOM,map)
       +'<h3>✈️ 輸入ワクチン</h3>'+tbl(IMP,map);
-  },function(err){
+  }).catch(function(err){
     w.innerHTML='<p style="color:red">⚠️ 読み込みエラー: '+err.message+'</p>';
   });
 }();
