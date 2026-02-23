@@ -5,26 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ワクチン在庫</title>
 <style>
-body{margin:16px;font-family:sans-serif}
+*{box-sizing:border-box}
+body{margin:8px;padding:0;font-family:sans-serif}
 #vsw .upd{font-size:12px;color:#888;text-align:right;margin-bottom:12px}
 #vsw .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#27ae60;margin-right:4px;vertical-align:middle}
 #vsw h3{font-size:15px;font-weight:bold;margin:20px 0 6px;padding:6px 12px;border-left:4px solid #0066cc;background:#f0f4f8;color:#1a2332}
-#vsw table{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:8px}
-#vsw th{background:#f0f4f8;padding:9px 14px;text-align:left;font-weight:bold;border:1px solid #dde4ec;color:#333}
-#vsw td{padding:9px 14px;border:1px solid #dde4ec;vertical-align:middle}
+#vsw table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px}
+#vsw th{background:#f0f4f8;padding:7px 10px;text-align:left;font-weight:bold;border:1px solid #dde4ec;color:#333}
+#vsw td{padding:7px 10px;border:1px solid #dde4ec;vertical-align:middle;word-break:break-all}
 #vsw tr:nth-child(even) td{background:#f8fafc}
-#vsw .q{text-align:center;font-weight:bold;font-size:15px;min-width:70px;white-space:nowrap}
+#vsw .q{text-align:center;font-weight:bold;font-size:14px;white-space:nowrap;min-width:50px}
 #vsw .q.out{color:#c0392b}
 #vsw .q.low{color:#e67e22}
 #vsw .q.ok{color:#27ae60}
-#vsw .b{display:inline-block;font-size:11px;padding:2px 7px;border-radius:20px;font-weight:bold;margin-left:6px;vertical-align:middle}
-#vsw .b.out{background:#fdecea;color:#c0392b}
-#vsw .b.low{background:#fef9e7;color:#e67e22}
 </style>
 </head>
 <body>
 <div id="vsw"><p style="color:#888">⏳ 在庫情報を読み込み中...</p></div>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
@@ -33,7 +30,6 @@ body{margin:16px;font-family:sans-serif}
   var app;
   try{app=firebase.app('vsw');}catch(e){app=firebase.initializeApp(cfg,'vsw');}
   var db=firebase.firestore(app);
-
   var DOM=[
     {n:'おたふくワクチン',p:'6,600円(税込)'},
     {n:'国産A型肝炎ワクチン(エイムゲン)',p:'8,800円(税込)'},
@@ -54,22 +50,20 @@ body{margin:16px;font-family:sans-serif}
     {n:'輸入日本脳炎ワクチン(JENVAC)',p:'6,600円(税込)'},
     {n:'輸入A型B型肝炎ワクチン(Twinrix)',p:'17,600円(税込)'}
   ];
-
   function row(c,map){
-    var pd=map[c.n],q='<span style="color:#bbb">－</span>',b='',cls='';
+    var pd=map[c.n],q='<span style="color:#bbb">－</span>',cls='';
     if(pd){
-      if(pd.stock===0){cls='out';q='終了';b='<span class="b out">在庫切れ</span>';}
+      if(pd.stock===0){cls='out';q='終了';}
       else if(pd.stock<pd.minStock){cls='low';q=pd.stock+' '+(pd.unit||'個');}
       else{cls='ok';q=pd.stock+' '+(pd.unit||'個');}
     }
-    return '<tr><td>'+c.n+b+'</td><td class="q '+cls+'">'+q+'</td><td>'+c.p+'</td></tr>';
+    return '<tr><td>'+c.n+'</td><td class="q '+cls+'">'+q+'</td><td>'+c.p+'</td></tr>';
   }
   function tbl(list,map){
     var r='';
     for(var i=0;i<list.length;i++)r+=row(list[i],map);
     return '<table><thead><tr><th>種類</th><th style="text-align:center">在庫</th><th>価格</th></tr></thead><tbody>'+r+'</tbody></table>';
   }
-
   var w=document.getElementById('vsw');
   db.collection('products').where('category','==','ワクチン').get().then(function(snap){
     var map={};
@@ -78,6 +72,8 @@ body{margin:16px;font-family:sans-serif}
     w.innerHTML='<div class="upd"><span class="dot"></span>'+dt+'</div>'
       +'<h3>🇯🇵 国産ワクチン</h3>'+tbl(DOM,map)
       +'<h3>✈️ 輸入ワクチン</h3>'+tbl(IMP,map);
+    // 親ページにコンテンツの高さを通知
+    window.parent.postMessage({iframeHeight: document.body.scrollHeight + 20}, '*');
   }).catch(function(err){
     w.innerHTML='<p style="color:red">⚠️ 読み込みエラー: '+err.message+'</p>';
   });
