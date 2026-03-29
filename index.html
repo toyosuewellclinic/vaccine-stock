@@ -65,14 +65,20 @@ body{margin:8px;padding:0;font-family:sans-serif}
     return '<table><thead><tr><th>種類</th><th style="text-align:center">在庫</th><th>価格</th></tr></thead><tbody>'+r+'</tbody></table>';
   }
   var w=document.getElementById('vsw');
-  db.collection('products').where('category','==','ワクチン').get().then(function(snap){
+  // 国産ワクチンと輸入ワクチンを両方取得
+  Promise.all([
+    db.collection('products').where('category','==','国産ワクチン').get(),
+    db.collection('products').where('category','==','輸入ワクチン').get(),
+    db.collection('products').where('category','==','ワクチン').get()
+  ]).then(function(results){
     var map={};
-    snap.forEach(function(doc){var d=doc.data();map[d.name]=d;});
+    results.forEach(function(snap){
+      snap.forEach(function(doc){var d=doc.data();map[d.name]=d;});
+    });
     var dt=new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})+' 更新';
     w.innerHTML='<div class="upd"><span class="dot"></span>'+dt+'</div>'
       +'<h3>🇯🇵 国産ワクチン</h3>'+tbl(DOM,map)
       +'<h3>✈️ 輸入ワクチン</h3>'+tbl(IMP,map);
-    // 親ページにコンテンツの高さを通知
     window.parent.postMessage({iframeHeight: document.body.scrollHeight + 20}, '*');
   }).catch(function(err){
     w.innerHTML='<p style="color:red">⚠️ 読み込みエラー: '+err.message+'</p>';
