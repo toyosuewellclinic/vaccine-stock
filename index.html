@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>ワクチン在庫</title>
 <style>
 *{box-sizing:border-box}
@@ -22,15 +25,16 @@ body{margin:8px;padding:0;font-family:sans-serif}
 </head>
 <body>
 <div id="vsw"><p style="color:#888">⏳ 在庫情報を読み込み中...</p></div>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
 !function(){
-  var cfg={apiKey:'AIzaSyAbUBYMYfKoQmBuPZVfCjjtBfZ0SoWTgMU',authDomain:'clinic-inventory-c2207.firebaseapp.com',projectId:'clinic-inventory-c2207',storageBucket:'clinic-inventory-c2207.firebasestorage.app',messagingSenderId:'609898487561',appId:'1:609898487561:web:6388126fef0c9672803dd8'};
-  var app;
-  try{app=firebase.app('vsw');}catch(e){app=firebase.initializeApp(cfg,'vsw');}
-  var db=firebase.firestore(app);
-  var DOM=[
+  // ============================================================
+  // Supabase 接続設定
+  // anon(publishable) key は公開可能。view `public_vaccine_stock` のみ読み取り可。
+  // ============================================================
+  var SUPABASE_URL = 'https://jgnlzogfnqawtfcvzpzx.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_O6NrECm8YI1750RZoa170g_A0LhiGaU';
+
+  var DOM = [
     {n:'おたふくワクチン',p:'6,600円(税込)'},
     {n:'国産A型肝炎ワクチン(エイムゲン)',p:'16,500円(税込)'},
     {n:'破傷風トキソイド',p:'3,800円(税込)'},
@@ -43,7 +47,7 @@ body{margin:8px;padding:0;font-family:sans-serif}
     {n:'アブリスボ',p:''},
     {n:'プレベナー20',p:''}
   ];
-  var IMP=[
+  var IMP = [
     {n:'輸入腸チフスワクチン(Typbar TCV)',p:'11,000円(税込)'},
     {n:'輸入狂犬病ワクチン(ChiroRab)',p:'14,800円(税込)'},
     {n:'輸入A型肝炎ワクチン(Havrix)',p:'8,800円(税込)'},
@@ -52,38 +56,56 @@ body{margin:8px;padding:0;font-family:sans-serif}
     {n:'輸入日本脳炎ワクチン(JENVAC)',p:'6,600円(税込)'},
     {n:'輸入A型B型肝炎ワクチン(Twinrix)',p:'17,600円(税込)'}
   ];
-  function row(c,map){
-    var pd=map[c.n],q='<span style="color:#bbb">－</span>',cls='';
-    if(pd){
-      if(pd.stock===0){cls='out';q='終了';}
-      else if(pd.stock<pd.minStock){cls='low';q=pd.stock+' '+(pd.unit||'個');}
-      else{cls='ok';q=pd.stock+' '+(pd.unit||'個');}
+
+  function row(c, map) {
+    var pd = map[c.n];
+    var q = '<span style="color:#bbb">－</span>', cls = '';
+    if (pd) {
+      if (pd.stock === 0) { cls = 'out'; q = '終了'; }
+      else if (pd.stock < pd.min_stock) { cls = 'low'; q = pd.stock + ' ' + (pd.unit || '個'); }
+      else { cls = 'ok'; q = pd.stock + ' ' + (pd.unit || '個'); }
     }
-    return '<tr><td>'+c.n+'</td><td class="q '+cls+'">'+q+'</td><td>'+c.p+'</td></tr>';
+    return '<tr><td>' + c.n + '</td><td class="q ' + cls + '">' + q + '</td><td>' + c.p + '</td></tr>';
   }
-  function tbl(list,map){
-    var r='';
-    for(var i=0;i<list.length;i++)r+=row(list[i],map);
-    return '<table><thead><tr><th>種類</th><th style="text-align:center">在庫</th><th>価格</th></tr></thead><tbody>'+r+'</tbody></table>';
+  function tbl(list, map) {
+    var r = '';
+    for (var i = 0; i < list.length; i++) r += row(list[i], map);
+    return '<table><thead><tr><th>種類</th><th style="text-align:center">在庫</th><th>価格</th></tr></thead><tbody>' + r + '</tbody></table>';
   }
-  var w=document.getElementById('vsw');
-  // 国産ワクチンと輸入ワクチンを両方取得
-  Promise.all([
-    db.collection('products').where('category','==','国産ワクチン').get(),
-    db.collection('products').where('category','==','輸入ワクチン').get(),
-    db.collection('products').where('category','==','ワクチン').get()
-  ]).then(function(results){
-    var map={};
-    results.forEach(function(snap){
-      snap.forEach(function(doc){var d=doc.data();map[d.name]=d;});
-    });
-    var dt=new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})+' 更新';
-    w.innerHTML='<div class="upd"><span class="dot"></span>'+dt+'</div>'
-      +'<h3>🇯🇵 国産ワクチン</h3>'+tbl(DOM,map)
-      +'<h3>✈️ 輸入ワクチン</h3>'+tbl(IMP,map);
-    window.parent.postMessage({iframeHeight: document.body.scrollHeight + 20}, '*');
-  }).catch(function(err){
-    w.innerHTML='<p style="color:red">⚠️ 読み込みエラー: '+err.message+'</p>';
+
+  var w = document.getElementById('vsw');
+  var url = SUPABASE_URL + '/rest/v1/public_vaccine_stock'
+          + '?select=name,category,stock,min_stock,unit,updated_at';
+
+  fetch(url, {
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      'Accept': 'application/json'
+    },
+    cache: 'no-store'
+  }).then(function(res) {
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }).then(function(rows) {
+    var map = {};
+    for (var i = 0; i < rows.length; i++) {
+      var d = rows[i];
+      map[d.name] = d;
+    }
+    var dt = new Date().toLocaleDateString('ja-JP', {
+      year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    }) + ' 更新';
+    w.innerHTML =
+        '<div class="upd"><span class="dot"></span>' + dt + '</div>'
+      + '<h3>🇯🇵 国産ワクチン</h3>' + tbl(DOM, map)
+      + '<h3>✈️ 輸入ワクチン</h3>' + tbl(IMP, map);
+    try {
+      window.parent.postMessage({ iframeHeight: document.body.scrollHeight + 20 }, '*');
+    } catch (e) {}
+  }).catch(function(err) {
+    w.innerHTML = '<p style="color:red">⚠️ 読み込みエラー: ' + err.message + '</p>';
   });
 }();
 </script>
