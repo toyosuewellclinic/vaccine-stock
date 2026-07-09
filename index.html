@@ -34,44 +34,47 @@ body{margin:8px;padding:0;font-family:sans-serif}
   var SUPABASE_URL = 'https://jgnlzogfnqawtfcvzpzx.supabase.co';
   var SUPABASE_ANON_KEY = 'sb_publishable_O6NrECm8YI1750RZoa170g_A0LhiGaU';
 
+  // v=ワクチン名(一般名) / b=商品名 / k=Supabase在庫キー(=inventory_products.name / 省略時は v で照合) / p=価格
   var DOM = [
-    {n:'おたふくワクチン',p:'6,600円(税込)'},
-    {n:'国産A型肝炎ワクチン(エイムゲン)',p:'16,500円(税込)'},
-    {n:'破傷風トキソイド',p:'3,800円(税込)'},
-    {n:'3種混合(DPT)ワクチン(トリビック)',p:'8,800円(税込)'},
-    {n:'帯状疱疹ワクチン(シングリックス)',p:'22,000円(税込)'},
-    {n:'肺炎球菌ワクチン(ニューモバックス)',p:'8,500円(税込)'},
-    {n:'水痘・帯状疱疹ワクチン（生ワクチン）',p:'8,400円(税込)'},
-    {n:'MRワクチン(ミールビック)',p:'8,800円(税込)'},
-    {n:'国産B型肝炎ワクチン(ビームゲン)',p:'6,600円(税込)'},
-    {n:'メンクアッドフィ',p:'24,000円(税込)'},
-    {n:'アブリスボ',p:''},
-    {n:'プレベナー20',p:''}
+    {v:'おたふくワクチン',       b:'',            k:'おたふくワクチン',                 p:'6,600円(税込)'},
+    {v:'国産A型肝炎ワクチン',    b:'エイムゲン',   k:'国産A型肝炎ワクチン(エイムゲン)',   p:'16,500円(税込)'},
+    {v:'破傷風トキソイド',       b:'',            k:'破傷風トキソイド',                 p:'3,800円(税込)'},
+    {v:'3種混合(DPT)ワクチン',   b:'トリビック',   k:'3種混合(DPT)ワクチン(トリビック)',  p:'8,800円(税込)'},
+    {v:'帯状疱疹ワクチン',       b:'シングリックス', k:'帯状疱疹ワクチン(シングリックス)',  p:'22,000円(税込)'},
+    {v:'水痘・帯状疱疹ワクチン', b:'生ワクチン',   k:'水痘・帯状疱疹ワクチン（生ワクチン）', p:'8,400円(税込)'},
+    {v:'MRワクチン',             b:'ミールビック', k:'MRワクチン(ミールビック)',          p:'8,800円(税込)'},
+    {v:'国産B型肝炎ワクチン',    b:'ビームゲン',   k:'国産B型肝炎ワクチン(ビームゲン)',   p:'6,600円(税込)'},
+    {v:'髄膜炎菌ワクチン',       b:'メンクアッドフィ', k:'メンクアッドフィ',              p:'24,000円(税込)'},
+    {v:'RSウイルスワクチン',     b:'アブリスボ',   k:'アブリスボ',                       p:'33,000円(税込)'},
+    {v:'肺炎球菌ワクチン',       b:'プレベナー20', k:'プレベナー20',                     p:''},
+    {v:'ポリオワクチン',         b:'イモバックスポリオ', k:'イモバックスポリオ',          p:'11,000円(税込)'},
+    {v:'HPVワクチン',            b:'シルガード9', k:'シルガード9',                      p:'33,000円(税込/回)'},
+    {v:'国産狂犬病ワクチン',     b:'ラビピュール', k:'ラビピュール',                    p:'16,500円(税込)'}
   ];
   var IMP = [
-    {n:'輸入腸チフスワクチン(Typbar TCV)',p:'11,000円(税込)'},
-    {n:'輸入狂犬病ワクチン(ChiroRab)',p:'14,800円(税込)'},
-    {n:'輸入A型肝炎ワクチン(Havrix)',p:'8,800円(税込)'},
-    {n:'輸入コレラワクチン(DUKORAL)',p:'12,000円(税込)'},
-    {n:'輸入3種混合ワクチン（Boostrix）',p:'5,500円(税込)'},
-    {n:'輸入日本脳炎ワクチン(JENVAC)',p:'6,600円(税込)'},
-    {n:'輸入A型B型肝炎ワクチン(Twinrix)',p:'17,600円(税込)'}
+    {v:'輸入腸チフスワクチン',   b:'Typbar TCV',  k:'輸入腸チフスワクチン(Typbar TCV)', p:'11,000円(税込)'},
+    {v:'輸入狂犬病ワクチン',     b:'ChiroRab',    k:'輸入狂犬病ワクチン(ChiroRab)',    p:'14,800円(税込)'},
+    {v:'輸入A型肝炎ワクチン',    b:'Havrix',      k:'輸入A型肝炎ワクチン(Havrix)',     p:'16,000円(税込)'},
+    {v:'輸入コレラワクチン',     b:'DUKORAL',     k:'輸入コレラワクチン(DUKORAL)',     p:'12,000円(税込)'},
+    {v:'輸入3種混合ワクチン',    b:'Boostrix',    k:'輸入3種混合ワクチン（Boostrix）', p:'11,000円(税込)'},
+    {v:'輸入日本脳炎ワクチン',   b:'JENVAC',      k:'輸入日本脳炎ワクチン(JENVAC)',    p:'6,600円(税込)'},
+    {v:'輸入A型B型肝炎ワクチン', b:'Twinrix',     k:'輸入A型B型肝炎ワクチン(Twinrix)', p:'17,600円(税込)'}
   ];
 
   function row(c, map) {
-    var pd = map[c.n];
+    var pd = map[c.k || c.v];
     var q = '<span style="color:#bbb">－</span>', cls = '';
     if (pd) {
       if (pd.stock === 0) { cls = 'out'; q = '終了'; }
       else if (pd.stock < pd.min_stock) { cls = 'low'; q = pd.stock + ' ' + (pd.unit || '個'); }
       else { cls = 'ok'; q = pd.stock + ' ' + (pd.unit || '個'); }
     }
-    return '<tr><td>' + c.n + '</td><td class="q ' + cls + '">' + q + '</td><td>' + c.p + '</td></tr>';
+    return '<tr><td>' + c.v + '</td><td>' + (c.b || '') + '</td><td class="q ' + cls + '">' + q + '</td><td>' + c.p + '</td></tr>';
   }
   function tbl(list, map) {
     var r = '';
     for (var i = 0; i < list.length; i++) r += row(list[i], map);
-    return '<table><thead><tr><th>種類</th><th style="text-align:center">在庫</th><th>価格</th></tr></thead><tbody>' + r + '</tbody></table>';
+    return '<table><thead><tr><th>ワクチン名</th><th>商品名</th><th style="text-align:center">在庫</th><th>価格</th></tr></thead><tbody>' + r + '</tbody></table>';
   }
 
   var w = document.getElementById('vsw');
