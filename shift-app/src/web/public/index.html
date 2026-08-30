@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>シフト管理</title>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<header class="bar">
+  <h1>シフト管理</h1>
+  <div class="bar-right">
+    <label>管理トークン
+      <input id="token" type="password" placeholder="ADMIN_TOKEN" autocomplete="off">
+    </label>
+    <button id="save-token" class="ghost">記憶</button>
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <div class="row">
+      <label>シフト期間
+        <select id="period"></select>
+      </label>
+      <button id="reload" class="ghost">再読込</button>
+      <span class="spacer"></span>
+      <button id="auto" class="primary">自動割当</button>
+      <button id="save">保存</button>
+      <button id="publish" class="warn">公開してSlackに通知</button>
+    </div>
+    <div class="row">
+      <details>
+        <summary>新しい期間を作る</summary>
+        <div class="row form">
+          <label>名前 <input id="new-name" placeholder="2026年9月"></label>
+          <label>開始 <input id="new-start" type="date"></label>
+          <label>終了 <input id="new-end" type="date"></label>
+          <label>提出期限 <input id="new-deadline" type="date"></label>
+          <button id="create">作成</button>
+        </div>
+      </details>
+      <span class="spacer"></span>
+      <span id="period-status" class="status"></span>
+    </div>
+    <p id="message" class="message" hidden></p>
+  </section>
+
+  <section class="panel">
+    <h2>指摘 <span id="issue-count" class="badge">0</span></h2>
+    <ul id="issues" class="issues"><li class="muted">読み込み待ちです。</li></ul>
+  </section>
+
+  <section class="panel">
+    <h2>シフト表</h2>
+    <p class="muted small">
+      セルの「＋」で追加、名前の「×」で削除、📌 で自動割当から保護します。
+      希望欄の ◎ は勤務希望、× は勤務不可です。
+    </p>
+    <div class="scroll">
+      <table id="board"><tbody><tr><td class="muted">読み込み待ちです。</td></tr></tbody></table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>勤務日数</h2>
+    <div class="scroll">
+      <table id="summary"><tbody></tbody></table>
+    </div>
+  </section>
+</main>
+
+<script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "shift-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Slack連携シフト作成アプリ（希望収集・自動割当・公開通知・交代申請）",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@slack/bolt": "^3.19.0",
+    "@supabase/supabase-js": "^2.45.4",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8"
+  }
+}

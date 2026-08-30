@@ -1,0 +1,48 @@
+# ============================================================
+# Slack アプリのマニフェスト
+# https://api.slack.com/apps → Create New App → From an app manifest
+# YOUR-DOMAIN を公開URL（Cloud Run / Render / ngrok など）に置き換えてから貼り付ける。
+# ============================================================
+display_information:
+  name: シフト管理
+  description: 希望シフトの収集・自動割当・確定シフトの通知・交代申請
+  background_color: "#0066cc"
+
+features:
+  bot_user:
+    display_name: シフト管理
+    always_online: true
+  slash_commands:
+    - command: /shift-request
+      url: https://YOUR-DOMAIN/slack/events
+      description: 希望シフトを提出・修正する
+      should_escape: false
+    - command: /shift-my
+      url: https://YOUR-DOMAIN/slack/events
+      description: 自分の今後の勤務を確認する
+      should_escape: false
+    - command: /shift-swap
+      url: https://YOUR-DOMAIN/slack/events
+      description: 交代・欠勤を申請する
+      should_escape: false
+    - command: /shift-admin
+      url: https://YOUR-DOMAIN/slack/events
+      description: 管理者向け操作（periods / new / open / close / status / assign / publish）
+      usage_hint: "help"
+      should_escape: false
+
+oauth_config:
+  scopes:
+    bot:
+      - commands       # スラッシュコマンド
+      - chat:write     # チャンネル・DM への投稿
+      - im:write       # DM を開く
+      - users:read     # ユーザー情報の参照
+
+settings:
+  interactivity:
+    is_enabled: true
+    request_url: https://YOUR-DOMAIN/slack/events
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false
